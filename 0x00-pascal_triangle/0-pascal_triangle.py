@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+'''A Pascal's triangle module.'''
+
 def pascal_triangle(n):
     '''Generate Pascal's triangle up to the specified number of rows.'''
     triangle = []
