@@ -1,21 +1,21 @@
-#!/usr/bin/env python3
-'''Module for determining if all lockboxes can be unlocked.
+#!/usr/bin/python3
+'''Module for managing lockboxes.
 '''
 
 
-def canUnlockAll(boxes):
-    '''Checks if all the boxes in a list of lockboxes, containing keys
-    (indices) to other boxes, can be unlocked, given that the first box is unlocked.
+def can_unlock_all(boxes):
+    '''Checks if all boxes in a list of boxes can be unlocked given
+    that the first box is unlocked.
     '''
     n = len(boxes)
-    seen_boxes = set([0])
-    unseen_boxes = set(boxes[0]) - set([0])
-    while len(unseen_boxes) > 0:
-        boxIdx = unseen_boxes.pop()
-        if not boxIdx or boxIdx >= n or boxIdx < 0:
+    seen_boxes = {0}
+    unseen_boxes = set(boxes[0]) - {0}
+    while unseen_boxes:
+        box_idx = unseen_boxes.pop()
+        if not box_idx or not 0 <= box_idx < n:
             continue
-        if boxIdx not in seen_boxes:
-            unseen_boxes |= set(boxes[boxIdx])
-            seen_boxes.add(boxIdx)
+        if box_idx not in seen_boxes:
+            unseen_boxes |= set(boxes[box_idx])
+            seen_boxes.add(box_idx)
     return n == len(seen_boxes)
 
