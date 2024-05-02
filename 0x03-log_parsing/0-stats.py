@@ -1,58 +1,55 @@
 #!/usr/bin/python3
-'''A script for parsing HTTP request logs and computing statistics.'''
+'''A script for parsing HTTP request logs and reporting statistics.'''
 
 import re
 import sys
 
-
-# Define a pattern to extract relevant data from each log line
+# Regular expression pattern to match log format
 LOG_PATTERN = (
-    r'\s*(?P<ip>\S+)\s*'  # IP Address
+    r'^\s*(?P<ip>\S+)\s*'  # IP Address
     r'\s*\[(?P<date>[^]]+)\]\s*'  # Date and time
-    r'\s*"[^"]+"\s*'  # HTTP request method and path
-    r'(?P<status_code>\d{3})\s*'  # HTTP status code
-    r'(?P<file_size>\d+)\s*'  # File size
+    r'\s*"[^"]+"\s*'  # HTTP Request
+    r'\s*(?P<status_code>\d{3})\s*'  # Status code
+    r'\s*(?P<file_size>\d+)\s*'  # File size
 )
 
-# Function to extract relevant data from a log line
-def extract_input(line):
-    match = re.fullmatch(LOG_PATTERN, line)
+# Function to extract status code and file size from a given line
+def extract_input(input_line):
+    match = re.fullmatch(LOG_PATTERN, input_line)
     if match is None:
-        return None  # If the line doesn't match, return None
-    
-    # Extract and return status code and file size as a dictionary
+        return None
+
     return {
         'status_code': match.group('status_code'),
         'file_size': int(match.group('file_size'))
     }
 
+# Function to print statistics
+def print_statistics(total_file_size, status_codes_count):
+    '''Prints the accumulated statistics of the HTTP request log.'''
+    print(f'File size: {total_file_size}', flush=True)
+    for status_code in sorted(status_codes_count):
+        count = status_codes_count[status_code]
+        if count > 0:
+            print(f'{status_code}: {count}', flush=True)
 
-# Function to update metrics (file size and status code count) based on a valid log line
-def update_metrics(data, total_file_size, status_codes_count):
+# Function to update metrics based on a log line
+def update_metrics(line, total_file_size, status_codes_count):
+    '''Updates the metrics from a given HTTP request log.'''
+    data = extract_input(line)
     if data is None:
-        return total_file_size  # Return current total if data extraction failed
+        return total_file_size  # Ignore invalid lines
 
+    # Update total file size and status code count if valid data
     status_code = data['status_code']
     file_size = data['file_size']
 
-    # Update status code count if the code is one of the tracked ones
     if status_code in status_codes_count:
         status_codes_count[status_code] += 1
 
-    # Update the total file size
     return total_file_size + file_size
 
-
-# Function to print the current statistics
-def print_statistics(total_file_size, status_codes_count):
-    print(f'File size: {total_file_size}', flush=True)  # Output total file size
-    for status_code in sorted(status_codes_count):
-        count = status_codes_count[status_code]
-        if count > 0:  # Only print non-zero status codes
-            print(f'{status_code}: {count}', flush=True)
-
-
-# Main function to process log lines and print statistics
+# Main function to process log lines and print statistics at intervals
 def run():
     total_file_size = 0
     line_count = 0
@@ -69,15 +66,11 @@ def run():
 
     try:
         while True:
-            line = sys.stdin.readline().strip()  # Read a line from stdin
+            line = sys.stdin.readline().strip()  # Read from stdin
             if not line:  # Stop if no more input
                 break
 
-            # Extract data from the line
-            extracted_data = extract_input(line)
-            # Update metrics based on the extracted data
-            total_file_size = update_metrics(extracted_data, total_file_size, status_codes_count)
-
+            total_file_size = update_metrics(line, total_file_size, status_codes_count)
             line_count += 1
 
             # Print statistics every 10 lines
@@ -85,10 +78,10 @@ def run():
                 print_statistics(total_file_size, status_codes_count)
 
     except (KeyboardInterrupt, EOFError):
-        # Print final statistics on interruption or end of file
+        # Print final statistics upon interruption or end of input
         print_statistics(total_file_size, status_codes_count)
 
 
-# Run the script
+# Entry point of the script
 if __name__ == '__main__':
     run()
