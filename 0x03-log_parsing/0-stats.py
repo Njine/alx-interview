@@ -16,8 +16,12 @@ def extract_log_info(line):
         r'\s*(?P<file_size>\d+)\s*',  # File size
     )
 
+    # Create the complete pattern from individual components
+    full_pattern = '{}-{}{}{}{}$'.format(
+        pattern[0], pattern[1], pattern[2], pattern[3], pattern[4]
+    )
+
     # Match the log line against the pattern
-    full_pattern = '{}-{}{}{}{}$'.format(*pattern)
     match = re.fullmatch(full_pattern, line)
 
     # Return None if the line doesn't match the expected format
@@ -44,15 +48,16 @@ def print_statistics(total_file_size, status_code_counts):
 
 # Function to update metrics based on log line information
 def update_metrics(log_info, total_file_size, status_code_counts):
-    '''Updates total file size and status code counts based on the log line.'''
-    # If the extracted log information is invalid, return the current total
+    '''Updates total file size & status code counts based on the log line.'''
+    # Return the current total if the log information is invalid
     if log_info is None:
         return total_file_size
 
-    # Add to the total file size
-    total_file_size += log_info['file_size']
+    # Increment the total file size
+    file_size = log_info['file_size']
+    total_file_size += file_size
 
-    # Increment the count for the given status code
+    # Update the status code count for the given status code
     status_code = log_info['status_code']
     if status_code in status_code_counts:
         status_code_counts[status_code] += 1
@@ -60,7 +65,7 @@ def update_metrics(log_info, total_file_size, status_code_counts):
     return total_file_size
 
 
-# Main function to process stdin and compute metrics
+# Main function to process standard input and compute metrics
 def run_log_parser():
     '''Processes standard input and computes statistics every 10 lines.'''
     total_file_size = 0
@@ -80,12 +85,14 @@ def run_log_parser():
         while True:
             # Read a line from standard input
             line = input().strip()
-            if not line:  # If it's an empty line, stop reading
+            if not line:  # If there's no more input, stop reading
                 break
 
-            # Extract the relevant log information and update the metrics
+            # Extract the relevant log information and update metrics
             log_info = extract_log_info(line)
-            total_file_size = update_metrics(log_info, total_file_size, status_code_counts)
+            total_file_size = update_metrics(
+                log_info, total_file_size, status_code_counts
+            )
             line_count += 1
 
             # Print statistics every 10 lines
