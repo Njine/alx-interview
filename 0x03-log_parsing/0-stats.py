@@ -5,7 +5,7 @@ import re
 
 
 def extract_input(line):
-    '''Extracts status code and file size from a line of an HTTP request log.'''
+    '''Extract status code & file size from a line of an HTTP request log.'''
     # Define the expected pattern for a valid HTTP request log line
     pattern = (
         r'\s*(?P<ip>\S+)\s*'  # IP Address
@@ -55,7 +55,7 @@ def update_metrics(line, total_file_size, status_codes_count):
 
 
 def run():
-    '''Reads from stdin line by line and prints statistics every 10 lines or on interruption.'''
+    '''Reads from stdin & prints statistics every 10 lines.'''
     total_file_size = 0
     line_count = 0
     status_codes_count = {
