@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 """ Prime Game Problem """
 
+
 def sieve(n):
     """ Sieve of Eratosthenes algorithm to find all primes up to n """
     is_prime = [True] * (n + 1)
     p = 2
-    while (p * p <= n):
-        if (is_prime[p] == True):
+    while p * p <= n:
+        if is_prime[p]:
             for i in range(p * p, n + 1, p):
                 is_prime[i] = False
         p += 1
@@ -19,6 +20,7 @@ def sieve(n):
         prime_counts[i] = count
     return prime_counts
 
+
 def isWinner(x, nums):
     """
     Determines the winner in the prime game using
@@ -26,10 +28,10 @@ def isWinner(x, nums):
     """
     if x <= 0 or not nums:
         return None
-    
+
     n = max(nums)
     prime_counts = sieve(n)
-    
+
     Ben = 0
     Maria = 0
 
